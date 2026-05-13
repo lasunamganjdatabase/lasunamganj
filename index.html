@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ভূমি অধিগ্রহণ মামলা ট্র্যাকিং পোর্টাল</title>
+<link href="https://fonts.maateen.me/siyam-rupali/font.css" rel="stylesheet">
+<style>
+  :root {
+    --primary:#1a237e;--primary-dark:#0d1657;--primary-light:#3949ab;
+    --accent:#c62828;--gold:#f9a825;--white:#ffffff;
+    --bg:#f4f6fb;--surface:#ffffff;--border:#dde3f0;
+    --text:#1a1a2e;--muted:#5c6680;
+    --success:#2e7d32;--success-bg:#e8f5e9;
+    --warning:#e65100;--warning-bg:#fff3e0;
+    --info:#0277bd;--info-bg:#e1f5fe;
+    --purple:#7b1fa2;--purple-bg:#f3e5f5;
+    --shadow-sm:0 1px 3px rgba(26,35,126,.08);
+    --shadow-md:0 4px 16px rgba(26,35,126,.12);
+    --shadow-lg:0 8px 32px rgba(26,35,126,.16);
+    --radius:10px;--radius-lg:16px;
+    font-family:'Siyam Rupali','Nikosh','Kalpurush',Arial,sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:'Siyam Rupali','Nikosh','Kalpurush',Arial,sans-serif;font-size:16px;line-height:1.7}
+
+  .header{background:linear-gradient(135deg,var(--primary-dark),var(--primary) 60%,var(--primary-light));color:#fff;position:sticky;top:0;z-index:100;box-shadow:var(--shadow-lg)}
+  .header-top{display:flex;align-items:center;gap:20px;padding:14px 40px;border-bottom:1px solid rgba(255,255,255,.15)}
+  .gov-emblem{width:64px;height:64px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 12px rgba(0,0,0,.2)}
+  .gov-emblem svg{width:50px;height:50px}
+  .header-titles{flex:1}
+  .h-main{font-size:21px;font-weight:700;line-height:1.3}
+  .h-sub{font-size:13px;opacity:.85;margin-top:2px}
+  .h-en{font-size:11px;opacity:.6;margin-top:1px;font-family:Arial,sans-serif;letter-spacing:.5px}
+  .header-badge{background:var(--gold);color:#4a2800;padding:4px 14px;border-radius:20px;font-size:12px;font-weight:700}
+  .nav-bar{display:flex;padding:0 40px}
+  .nav-bar a{color:rgba(255,255,255,.85);text-decoration:none;padding:11px 18px;font-size:14px;border-bottom:3px solid transparent;transition:all .2s;cursor:pointer}
+  .nav-bar a:hover,.nav-bar a.active{color:#fff;border-bottom-color:var(--gold);background:rgba(255,255,255,.07)}
+
+  .hero{background:linear-gradient(180deg,var(--primary),#283593);color:#fff;padding:44px 40px 60px;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E")}
+  .hero-title{font-size:27px;font-weight:700;margin-bottom:8px;position:relative}
+  .hero-sub{font-size:15px;opacity:.8;margin-bottom:32px;position:relative}
+
+  .search-card{background:#fff;border-radius:var(--radius-lg);padding:26px 30px;max-width:640px;margin:0 auto;box-shadow:var(--shadow-lg);position:relative}
+  .search-card-title{color:var(--primary);font-size:16px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+  .search-row{display:flex;gap:10px}
+  .search-input{flex:1;border:2px solid var(--border);border-radius:var(--radius);padding:12px 16px;font-size:16px;font-family:'Siyam Rupali',Arial,sans-serif;color:var(--text);outline:none;transition:all .2s;background:#f8f9ff}
+  .search-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(26,35,126,.12);background:#fff}
+  .search-input::placeholder{color:var(--muted);font-family:'Siyam Rupali',Arial,sans-serif}
+  .btn-primary{background:var(--primary);color:#fff;border:none;border-radius:var(--radius);padding:12px 22px;font-size:15px;font-family:'Siyam Rupali',Arial,sans-serif;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
+  .btn-primary:hover{background:var(--primary-dark);transform:translateY(-1px)}
+  .btn-secondary{background:transparent;color:var(--primary);border:2px solid var(--primary);border-radius:var(--radius);padding:9px 18px;font-size:14px;font-family:'Siyam Rupali',Arial,sans-serif;cursor:pointer;transition:all .2s}
+  .btn-secondary:hover{background:var(--primary);color:#fff}
+  .search-hint{font-size:12px;color:var(--muted);margin-top:10px;text-align:left}
+
+  #result-area{padding:32px 40px 0;display:none}
+
+  .status-card{background:#fff;border-radius:var(--radius-lg);box-shadow:var(--shadow-md);border-left:5px solid var(--primary);overflow:hidden;max-width:900px;margin:0 auto 32px}
+  .status-card-header{background:var(--primary);color:#fff;padding:16px 24px;display:flex;justify-content:space-between;align-items:center}
+  .status-card-header h3{font-size:16px;font-weight:700}
+  .status-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:20px;font-size:13px;font-weight:600}
+  .badge-check{background:var(--success-bg);color:var(--success)}
+  .badge-award{background:#fff8e1;color:#e65100}
+  .badge-notice{background:var(--info-bg);color:var(--info)}
+  .badge-verify{background:var(--purple-bg);color:var(--purple)}
+  .badge-default{background:var(--warning-bg);color:var(--warning)}
+  /* বিদ্যমান badge স্টাইলগুলোর নিচে যোগ করুন */
+.badge-filed { background: #e8eaf6; color: #3949ab; }
+
+  .status-card-body{padding:22px}
+  .status-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:18px}
+  .status-field{padding:11px 14px;background:var(--bg);border-radius:8px}
+  .sf-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px;font-family:Arial,sans-serif}
+  .sf-value{font-size:15px;font-weight:600;color:var(--text)}
+  .sf-value.accent{color:var(--primary)}
+  .sf-value.danger{color:var(--accent)}
+  .sf-value.success{color:var(--success)}
+
+  .progress-bar-container{margin:18px 0}
+  .progress-label{font-size:12px;color:var(--muted);margin-bottom:7px}
+  .progress-stages{display:flex;gap:4px;margin-bottom:5px}
+  .stage-dot{flex:1;height:8px;border-radius:4px;background:var(--border);transition:background .3s}
+  .stage-dot.active{background:var(--primary)}
+  .stage-dot.done{background:var(--success)}
+  .stage-names{display:flex;gap:4px;font-size:10px;color:var(--muted)}
+  .stage-name{flex:1;text-align:center;line-height:1.3}
+  .stage-name.active-label{color:var(--primary);font-weight:700}
+
+  .check-ready-box{background:var(--success-bg);border:1px solid #a5d6a7;border-radius:8px;padding:14px 18px;margin-top:14px;display:flex;align-items:center;gap:12px}
+
+  .main-content{padding:40px;max-width:1200px;margin:0 auto}
+  .section-title{font-size:21px;font-weight:700;color:var(--primary);margin-bottom:4px;padding-bottom:10px;border-bottom:3px solid var(--primary);display:inline-block}
+  .section-sub{color:var(--muted);font-size:14px;margin-bottom:22px;margin-top:4px}
+  .faq-section,.contact-section{margin-bottom:48px}
+
+  .stats-bar{background:#fff;border-bottom:1px solid var(--border);padding:13px 40px;display:flex;gap:36px;flex-wrap:wrap}
+  .stat-item{display:flex;align-items:center;gap:10px}
+  .stat-number{font-size:20px;font-weight:700;color:var(--primary)}
+  .stat-label{font-size:12px;color:var(--muted);line-height:1.3}
+  .stat-divider{width:1px;background:var(--border);height:30px}
+
+  /* FAQ Grid Fix */
+  .faq-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;}
+  .faq-item{background:#fff;border-radius:var(--radius);border:1px solid var(--border);overflow:hidden}
+  .faq-question{padding:13px 16px;font-size:14px;font-weight:600;color:var(--primary);cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;user-select:none;transition:background .2s}
+  .faq-question:hover{background:#f0f2ff}
+  .faq-arrow{font-size:11px;transition:transform .2s;flex-shrink:0;margin-top:3px}
+  .faq-answer{padding:0 16px;font-size:13px;color:var(--muted);line-height:1.7;max-height:0;overflow:hidden;transition:max-height .3s ease,padding .2s}
+  /* লেখা যেন না কাটে সেজন্য max-height বড় করা */
+  .faq-answer.open {
+  max-height: 1000px; /* লেখা বড় হলেও ধরবে */
+  padding: 0 16px 13px;}
+  .faq-item.open .faq-arrow{transform:rotate(180deg)}
+  .faq-item.open .faq-question{background:#f0f2ff}
+
+  .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+  .contact-form-card{background:#fff;border-radius:var(--radius-lg);padding:26px;box-shadow:var(--shadow-sm);border:1px solid var(--border)}
+  .contact-info-card{background:var(--primary);color:#fff;border-radius:var(--radius-lg);padding:26px;box-shadow:var(--shadow-md)}
+  .form-group{margin-bottom:16px}
+  .form-label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+  .form-control{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:10px 13px;font-size:15px;font-family:'Siyam Rupali',Arial,sans-serif;color:var(--text);background:#f8f9ff;outline:none;transition:border-color .2s}
+  .form-control:focus{border-color:var(--primary);background:#fff}
+  .form-control::placeholder{color:#aab0cc}
+  textarea.form-control{min-height:95px;resize:vertical}
+  select.form-control{cursor:pointer}
+  .info-item{display:flex;align-items:flex-start;gap:12px;margin-bottom:18px}
+  .info-icon{width:34px;height:34px;background:rgba(255,255,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+  .info-text{font-size:14px;line-height:1.5;opacity:.9}
+  .info-text strong{display:block;font-size:12px;opacity:.7;margin-bottom:1px}
+
+  .toast{position:fixed;bottom:24px;right:24px;background:var(--success);color:#fff;padding:13px 20px;border-radius:var(--radius);box-shadow:var(--shadow-lg);font-size:14px;z-index:999;display:none;animation:slideIn .3s ease}
+  @keyframes slideIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+  .footer{background:var(--primary-dark);color:rgba(255,255,255,.8);padding:24px 40px;text-align:center;font-size:13px}
+  .footer-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:10px}
+  .footer-links{display:flex;gap:18px}
+  .footer a{color:var(--gold);text-decoration:none}
+
+  /* লোডার এনিমেশন স্টাইল */
+  .loader-container { padding: 40px; text-align: center; }
+  .spinner {
+    border: 4px solid rgba(26, 35, 126, 0.1);
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border-left-color: var(--primary);
+    animation: spin 1s linear infinite;
+    margin: 0 auto 15px auto;
+  }
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* মোবাইল ভিউর জন্য */
+@media screen and (max-width: 600px) {
+  .faq-grid {
+    grid-template-columns: 1fr; /* ১ কলামে আসবে */
+  }
+  .faq-question {
+    font-size: 15px;
+    white-space: normal; /* লেখা নিচে নিচে আসবে */
+  }
+}
+  /* আপনার বিদ্যমান মিডিয়া কুয়েরি সেকশনটি এভাবে আপডেট করুন */
+@media (max-width: 768px) {
+  .header {
+    position: relative !important; /* স্টিকি পজিশন বাতিল করবে */
+    box-shadow: none;
+  }
+  
+  .header-top {
+    padding: 20px 10px;
+  }
+
+  .h-main {
+    font-size: 18px; /* মোবাইলে ফন্ট একটু ছোট করা */
+  }
+
+  .h-sub, .h-en {
+    font-size: 12px;
+  }
+  /* নেভিগেশন বারকে ফ্লেক্সবক্স হিসেবে সাজানো */
+  .nav-bar {
+    display: flex !important;
+    justify-content: space-around !important; /* আইটেমগুলোর মাঝে সমান জায়গা থাকবে */
+    padding: 0 !important;
+    background: var(--primary-dark); /* মোবাইলে একটু গাঢ় ব্যাকগ্রাউন্ড */
+    width: 100% !important;
+  }
+
+  /* প্রতিটি মেনু লিংকের স্টাইল */
+  .nav-bar a {
+    flex: 1; /* প্রতিটি বাটন সমান জায়গা নেবে */
+    text-align: center; /* লেখা মাঝখানে থাকবে */
+    padding: 12px 5px !important;
+    font-size: 13px !important; /* মোবাইলে ফন্ট একটু ছোট */
+    border-bottom: 2px solid transparent;
+    display: flex;
+    flex-direction: column; /* আইকন উপরে এবং লেখা নিচে (ঐচ্ছিক) */
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* একটিভ মেনুর নিচের বর্ডার */
+  .nav-bar a.active {
+    border-bottom-color: var(--gold) !important;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  /* যদি চান শুধু মেনুবারটা আটকে থাকুক, তাহলে নিচের টুকু ব্যবহার করতে পারেন (ঐচ্ছিক) */
+  /* .nav-bar { position: sticky; top: 0; z-index: 1000; background: var(--primary); } */
+
+  /* সার্চ রো-কে কলাম আকারে সাজানো */
+  .search-row {
+    display: flex;
+    flex-direction: column !important; /* ইনপুট ও বাটন নিচে নিচে আসবে */
+    gap: 12px; /* উভয়ের মাঝে গ্যাপ */
+    align-items: stretch; /* পুরো চওড়া হবে */
+  }
+
+  /* ইনপুট বক্সের এলাইনমেন্ট ও সাইজ */
+  .search-input {
+    width: 100% !important;
+    box-sizing: border-box; /* প্যাডিং যেন বাইরে না যায় */
+    text-align: center; /* মোবাইলে লেখা মাঝখানে থাকলে দেখতে ভালো লাগে */
+  }
+
+  /* বাটনের এলাইনমেন্ট */
+  .btn-primary {
+    width: 100% !important;
+    padding: 14px; /* মোবাইলে ক্লিক করতে সুবিধা হবে */
+  }
+
+  /* স্ট্যাটাস বারকে এক কলামে অথবা সুন্দর দুই কলামে সাজানো */
+  .stats-bar {
+    display: flex !important;
+    flex-direction: column !important; /* একটির নিচে একটি আসবে */
+    padding: 15px !important;
+    gap: 12px !important;
+    align-items: flex-start !important; /* বাম দিক থেকে শুরু হবে */
+  }
+
+  .stat-item {
+    display: flex !important;
+    flex-direction: row !important; /* সংখ্যা এবং লেখা এক লাইনে থাকবে */
+    align-items: center !important;
+    gap: 10px !important;
+    width: 100%;
+    border-bottom: 1px solid #eee; /* প্রতিটির মাঝে হালকা দাগ */
+    padding-bottom: 8px;
+  }
+
+  .stat-item:last-child {
+    border-bottom: none;
+  }
+
+  .stat-number {
+    font-size: 18px !important;
+    min-width: 60px; /* সংখ্যাগুলো যেন সমান জায়গা নেয় */
+  }
+
+  .stat-label {
+    font-size: 13px !important;
+    white-space: nowrap; /* লেখা যেন ভেঙে না যায় */
+  }
+
+  .stat-divider {
+    display: none; /* ডিভাইডার দরকার নেই */
+  }
+  /* রেজাল্ট কার্ডের মূল গ্রিড ১ কলামে আনা */
+  .status-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  /* রেজাল্ট কার্ডের গ্রিড ১ কলামে আনা */
+  .status-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  .status-field {
+    width: 100% !important;
+    padding: 12px !important;
+  }
+  
+  /* প্রোগ্রেস বারের লেখা ছোট করা */
+  .stage-name {
+    font-size: 8px !important;
+    line-height: 1.1;
+  }
+
+  /* প্রতিটি ফিল্ড যেন পুরো চওড়া হয় */
+  .status-field {
+    width: 100% !important;
+    grid-column: span 1 !important; /* গ্রিড স্প্যান রিমুভ করা */
+    padding: 12px !important;
+  }
+
+  /* প্রোগ্রেস বারের ধাপগুলো ছোট স্ক্রিনে এলাইন করা */
+  .progress-stages {
+    gap: 2px !important;
+  }
+
+  .stage-name {
+    font-size: 8px !important; /* ধাপের নাম আরও ছোট করা যেন পাশাপাশি ধরে */
+    line-height: 1.1;
+  }
+
+  /* নিচের বাটনগুলো (প্রিন্ট ও যোগাযোগ) পাশাপাশি সুন্দরভাবে সাজানো */
+  #result-area .btn-secondary {
+    flex: 1; /* বাটনগুলো সমান সমান বড় হবে */
+    text-align: center;
+    font-size: 13px;
+    padding: 10px 5px;
+  }
+  
+  /* কন্টাক্ট গ্রিডকে কলামে রূপান্তর */
+  .contact-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 20px !important;
+    padding: 0 10px !important;
+  }
+
+  /* অনলাইন আবেদন ফর্ম বক্স */
+  .contact-form-card {
+    width: 100% !important;
+    margin-bottom: 10px;
+  }
+
+  /* কার্যালয়ের তথ্য বক্স */
+  .contact-info-card {
+    width: 100% !important;
+  }
+
+  /* আইকন এবং টেক্সটের এলাইনমেন্ট ঠিক করা */
+  .info-item {
+    gap: 15px !important;
+  }
+
+  /* ফুটার সেকশনকে সেন্টারে আনা */
+  .footer {
+    padding: 30px 20px !important;
+    text-align: center !important;
+  }
+
+  /* উপরের অংশ (কার্যালয়ের নাম) */
+  .footer-top {
+    flex-direction: column !important;
+    gap: 15px !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* লিংকগুলো (গোপনীয়তা নীতি, তথ্য অধিকার) এক লাইনে বা সুন্দরভাবে সাজানো */
+  .footer-links {
+    display: flex !important;
+    justify-content: center !important;
+    flex-wrap: wrap !important; /* জায়গা না হলে নিচে আসবে */
+    gap: 15px !important;
+    margin-top: 10px !important;
+  }
+
+  /* কপিরাইট বা আপডেট টেক্সট */
+  .footer div:last-child {
+    margin-top: 15px;
+    font-size: 11px;
+    opacity: 0.8;
+  }
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-top">
+    <div class="gov-emblem">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/8/84/Government_Seal_of_Bangladesh.svg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original" 
+       alt="Bangladesh Govt Logo" 
+       style="width: 58px; height: 58px; object-fit: contain;">
+</div>
+    <div class="header-titles">
+      <div class="h-main">জেলা প্রশাসকের কার্যালয়, সুনামগঞ্জ</div>
+      <div class="h-sub">ভূমি অধিগ্রহণ শাখা</div>
+      <div class="h-en">Office of the Deputy Commissioner, Sunamganj | Land Acquisition Section</div>
+    </div>
+  </div>
+  <nav class="nav-bar">
+    <a href="#search-section" class="active">🔍 মামলা অনুসন্ধান</a>
+    <a href="#faq-section">❓ সাধারণ জিজ্ঞাসা</a>
+    <a href="#contact-section">📞 যোগাযোগ</a>
+  </nav>
+</header>
+
+<div class="stats-bar">
+  <div class="stat-item"><div class="stat-number">১,২৪৭</div><div class="stat-label">মোট সক্রিয় মামলা</div></div>
+  <div class="stat-divider"></div>
+  <div class="stat-item"><div class="stat-number">৩৪৮</div><div class="stat-label">চেক প্রস্তুত</div></div>
+  <div class="stat-divider"></div>
+  <div class="stat-item"><div class="stat-number">১৮</div><div class="stat-label">আজকের শুনানি</div></div>
+</div>
+
+<section id="search-section" style="scroll-margin-top:100px">
+<div class="hero">
+  <div class="hero-title">আপনার ভূমি অধিগ্রহণ মামলার অবস্থা জানুন</div>
+  <div class="hero-sub">আপনার নাম অথবা এনআইডি প্রবেশ করুন এবং তাৎক্ষণিক স্ট্যাটাস কার্ড দেখুন</div>
+  <div class="search-card">
+    <div class="search-card-title">🗂️ মামলা ট্র্যাকিং সিস্টেম</div>
+    <div class="search-row">
+      <input type="text" class="search-input" id="case-no-input" placeholder="যেমন: আপনার নাম বা NID..." onkeydown="if(event.key==='Enter')searchCase()">
+      <button class="btn-primary" onclick="searchCase()">🔍 অনুসন্ধান</button>
+    </div>
+  </div>
+</div>
+</section>
+
+<div id="result-area"><div id="result-container"></div></div>
+
+<div class="main-content">
+  <section id="faq-section" class="faq-section" style="scroll-margin-top:100px">
+    <div class="section-title">❓ সাধারণ জিজ্ঞাসা</div>
+   
+    <div class="faq-grid">
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-question">ভূমি অধিগ্রহণ প্রক্রিয়া কতটি ধাপে সম্পন্ন হয়?<span class="faq-arrow">▼</span></div>
+        <div class="faq-answer">ভূমি অধিগ্রহণ প্রক্রিয়ার মূল ধাপগুলো হলো—প্রাথমিক নোটিশ জারি ও ভিডিও চিত্র ধারণের মাধ্যমে শুরু হওয়া, এরপর স্থাবর সম্পত্তির যৌথ তদন্ত ও ফিল্ড বুক প্রস্তুত করা। সংক্ষুব্ধ পক্ষ চাইলে এ পর্যায়ে আপত্তি দাখিল করতে পারেন, যা নিষ্পত্তি শেষে অধিগ্রহণের চূড়ান্ত সিদ্ধান্ত গৃহীত হয়। পরবর্তীতে দখল গ্রহণের নোটিশ জারি ও দাবিনামা গ্রহণপূর্বক জমির মূল্য নির্ধারণ ও প্রাক্কলন প্রস্তুত করা হয় এবং সেই অনুযায়ী রোয়েদাদ বা এওয়ার্ড তৈরি করে ক্ষতিগ্রস্তদের মাঝে ক্ষতিপূরণ বিতরণ করা হয়। </div>
+      </div>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-question">ক্ষতিপূরণ পেতে কি কি কাগজপত্র জমা দিতে হবে?<span class="faq-arrow">▼</span></div>
+        <div class="faq-answer">নির্ধারিত ফরমে ক্ষতিপূরণের আবেদন, আবেদনকারীর সদ্য তোলা পাসপোর্ট সাইজের ১ কপি ছবি, জাতীয় পরিচয়পত্রের ফটোকপি (সংশ্লিষ্ট ইউ.পি চেয়ারম্যান/কাউন্সিলর/মেয়র কর্তৃক সত্যায়িত), হাল সন পর্যন্ত পরিশোধিত ভূমি উন্নয়ন করের রশিদ (খাজনার দাখিলা), অধিগ্রহণকৃত/হুকুমদখলকৃত ভূমির খতিয়ানের সহি মোহরযুক্ত নকল/মূল খতিয়ান, ক্রয়/খরিদসূত্রে মালিকানার ক্ষেত্রে দলিল, ভায়া দলিল ও তদানুসারে মালিকানার স্বপক্ষে ধারাবাহিক দলিল সমূহ, খতিয়ানের রেকর্ডীয় মালিক এবং ক্রয়/খরিদ সূত্রে মালিক মৃত্যুবরণ করিলে তার আইনানুগ ওয়ারিশ ও ক্রমওয়ারিশ সনদ (সংশ্লিষ্ট ইউ.পি চেয়ারম্যান/কাউন্সিলর/মেয়র কর্তৃক সত্যায়িত), রেকর্ড হাল নাগাদ করণ পূর্বক নিজ নামে সৃজিত খতিয়ান (নামজারী জমা খারিজ) দাখিল।</div>
+      </div>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-question">আমি কীভাবে আমার মামলার আপডেট পাব?<span class="faq-arrow">▼</span></div>
+        <div class="faq-answer">এই পোর্টালে এনআইডি নম্বর প্রবেশ করলে তাৎক্ষণিকভাবে সর্বশেষ অবস্থান দেখতে পাবেন। </div>
+      </div>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-question">কোন আইন অনুসারে অধিগ্রহণ করা হয়?<span class="faq-arrow">▼</span></div>
+        <div class="faq-answer">স্থাবর সম্পত্তি অধিগ্রহণ ও হুকুমদখল আইন, ২০১৭</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact-section" class="contact-section" style="scroll-margin-top:100px">
+    <div class="section-title">📞 যোগাযোগ ও মতামত</div>
+    <div class="section-sub">অভিযোগ, জিজ্ঞাসা বা মতামত পাঠান</div>
+    <div class="contact-grid">
+      <div class="contact-form-card">
+        <h3 style="color:var(--primary);font-size:15px;margin-bottom:18px;font-weight:700">📝 অনলাইন ফর্ম</h3>
+        <div class="form-group"><label class="form-label">নাম *</label><input type="text" class="form-control" placeholder="আপনার পূর্ণ নাম লিখুন"></div>
+        <div class="form-group"><label class="form-label">এলএ কেস নং *</label><input type="text" class="form-control"></div>
+        <div class="form-group"><label class="form-label">মোবাইল নম্বর *</label><input type="tel" class="form-control" placeholder="০১XXXXXXXXX"></div>
+        <div class="form-group"><label class="form-label">মতামত *</label><input type="text" class="form-control"></div>
+        <button class="btn-primary" style="width:100%" onclick="showToast('✅ আপনার আবেদন সফলভাবে দাখিল হয়েছে!')">📨 দাখিল করুন</button>
+      </div>
+      <div class="contact-info-card">
+        <h3 style="font-size:15px;font-weight:700;margin-bottom:18px">📌 কার্যালয়ের তথ্য</h3>
+        <div class="info-item"><div class="info-icon">🏢</div><div class="info-text"><strong>ঠিকানা</strong> রুম নংঃ ৩১১, ভূমি অধিগ্রহণ শাখা, জেলা প্রশাসকের কার্যালয়, <br>সুনামগঞ্জ</div></div>
+        <div class="info-item"><div class="info-icon">🕐</div><div class="info-text"><strong>কার্যালয়ের সময়</strong>রবি — বৃহস্পতিবার: সকাল ৯:০০ — বিকাল ০৫:০০</div></div>
+        <div style="margin-top:20px;padding:13px;background:rgba(255,255,255,.1);border-radius:8px;font-size:13px;opacity:.9">⚠️ চেক গ্রহণের জন্য মূল NID আনুন। প্রতিনিধি পাঠালে আম-মোক্তারনামা আবশ্যক।</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<footer class="footer">
+  <!-- ক্রেডিট সেকশন -->
+  <div style="max-width: 1000px; margin: 0 auto 30px auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px;">
+    
+    <div>
+      <h4 style="color: var(--gold); font-size: 14px; margin-bottom: 10px; border-left: 3px solid var(--gold); padding-left: 10px;">সার্বিক তত্ত্বাবধানে</h4>
+      <p style="font-size: 13px; line-height: 1.6;">
+        <strong>মোহাম্মদ মিনহাজুর রহমান</strong><br>
+        <span style="opacity: 0.8;">জেলা প্রশাসক ও জেলা ম্যাজিস্ট্রেট, সুনামগঞ্জ</span>
+      </p>
+      <p style="font-size: 13px; line-height: 1.6; margin-top: 8px;">
+        <strong>সমর কুমার পাল</strong><br>
+        <span style="opacity: 0.8;">অতিরিক্ত জেলা প্রশাসক (রাজস্ব), সুনামগঞ্জ</span>
+      </p>
+    </div>
+
+    <div>
+      <h4 style="color: var(--gold); font-size: 14px; margin-bottom: 10px; border-left: 3px solid var(--gold); padding-left: 10px;">পরিকল্পনা ও নির্মাণে</h4>
+      <p style="font-size: 13px; line-height: 1.6;">
+        <strong>হাসিবুল হাসান ডিও</strong><br>
+        <span style="opacity: 0.8;">ভূমি অধিগ্রহণ কর্মকর্তা, সুনামগঞ্জ</span>
+      </p>
+    </div>
+
+    <div>
+      <h4 style="color: var(--gold); font-size: 14px; margin-bottom: 10px; border-left: 3px solid var(--gold); padding-left: 10px;">ডাটাবেস প্রনয়ণে</h4>
+      <p style="font-size: 13px; line-height: 1.6;">
+        <strong>সাকোয়ার হোসাইন</strong><br>
+        <span style="opacity: 0.8;">নাজির-কাম-ক্যাশিয়ার (এলএ শাখা)</span>
+      </p>
+      <p style="font-size: 13px; line-height: 1.6; margin-top: 8px;">
+        <strong>কান্ত রায়</strong><br>
+        <span style="opacity: 0.8;">সার্টিফিকেট সহকারী (এলএ শাখা)</span>
+      </p>
+    </div>
+
+  </div>
+
+  <div class="footer-top">
+    <div>ভূমি অধিগ্রহণ শাখা | জেলা প্রশাসকের কার্যালয়, সুনামগঞ্জ</div>
+    <div class="footer-links">
+      <a href="#">গোপনীয়তা নীতি</a>
+      <a href="#">তথ্য অধিকার</a>
+      <a href="#">সাইটম্যাপ</a>
+    </div>
+  </div>
+  <div style="margin-top: 10px; font-size: 11px; opacity: 0.6;">
+    সর্বশেষ আপডেট: মে ২০২৬ | সংস্করণ ১.০.০
+  </div>
+</footer>
+
+
+<div id="toast" class="toast"></div>
+
+<script>
+
+  // আপনার index.html-এর script-এর একদম উপরে
+const API_URL = 'https://script.google.com/macros/s/AKfycbxdHk0kXYl1RFySAQ4QheOsuXJTYj8Ya4XbGMgfBkBkP_2Am0Bwcz79bAiKvAxAk39h/exec';
+
+// ধাপ এবং স্ট্যাটাসের নতুন কনফিগারেশন 
+const STATUS_CFG = {
+  '৪ ধারার নোটিশ':      {step:1, badge:'badge-notice',  icon:'📢'},
+  'যৌথ যাচাই':           {step:2, badge:'badge-verify',  icon:'🔍'},
+  '৭ ধারা নোটিশ':        {step:3, badge:'badge-notice',  icon:'📋'},
+  'ফাইল প্রসেসিং':       {step:4, badge:'badge-award',   icon:'⚙️'},
+  'নথিজাত':              {step:5, badge:'badge-filed',   icon:'🗂️'},  // ← নতুন
+  'তথ্যের ঘাটতি রয়েছে': {step:6, badge:'badge-default', icon:'⚠️'},  // ← ছিল 5
+  'চেক প্রস্তুত':        {step:7, badge:'badge-check',   icon:'✅'},  // ← ছিল 6
+};
+
+const STAGES = [
+  '৪ ধারার নোটিশ',
+  'যৌথ যাচাই',
+  '৭ ধারা নোটিশ',
+  'ফাইল প্রসেসিং',
+  'নথিজাত',              // ← নতুন যোগ
+  'তথ্যের ঘাটতি রয়েছে',
+  'চেক প্রস্তুত'
+];
+
+function searchCase() {
+  var val = document.getElementById('case-no-input').value.trim();
+  if(!val) {
+    showToast("অনুগ্রহ করে আবেদনকারীর নাম বা এনআইডি প্রদান করুন।");
+    return;
+  }
+
+  const cont = document.getElementById('result-container');
+  const area = document.getElementById('result-area');
+  area.style.display = 'block';
+
+  // লোডার প্রদর্শন
+  cont.innerHTML = `
+    <div class="status-card loader-container">
+      <div class="spinner"></div>
+      <div style="font-weight: 600; color: var(--primary);">সার্ভার থেকে তথ্য খোঁজা হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...</div>
+    </div>
+  `;
+  area.scrollIntoView({behavior:'smooth',block:'start'});
+
+function searchCase() {
+  var val = document.getElementById('case-no-input').value.trim();
+  if (!val) {
+    showToast("অনুগ্রহ করে নাম বা এনআইডি প্রদান করুন।");
+    return;
+  }
+
+  const cont = document.getElementById('result-container');
+  const area = document.getElementById('result-area');
+  area.style.display = 'block';
+
+  cont.innerHTML = `
+    <div class="status-card loader-container">
+      <div class="spinner"></div>
+      <div style="font-weight:600;color:var(--primary);">
+        সার্ভার থেকে তথ্য খোঁজা হচ্ছে...
+      </div>
+    </div>`;
+  area.scrollIntoView({behavior:'smooth', block:'start'});
+
+  // JSONP দিয়ে call — CORS সমস্যা নেই
+  const callbackName = 'cb_' + Date.now();
+  const script = document.createElement('script');
+  
+  window[callbackName] = function(response) {
+    document.body.removeChild(script);
+    delete window[callbackName];
+    
+    if (response.error) {
+      showErrorMsg("সার্ভার ত্রুটি: " + response.error);
+      return;
+    }
+    drawResults(response.data, val);
+  };
+
+  script.src = API_URL + '?callback=' + callbackName + '&q=' + encodeURIComponent(val);
+  script.onerror = function() {
+    showErrorMsg("সংযোগ ব্যর্থ হয়েছে। আবার চেষ্টা করুন।");
+  };
+  document.body.appendChild(script);
+}
+
+function drawResults(results, searchVal) {
+  const cont = document.getElementById('result-container');
+  
+  if (!results || results.length === 0) {
+    cont.innerHTML = `
+      <div class="status-card" style="border-left-color:#c62828;max-width:900px;margin:0 auto 32px">
+        <div class="status-card-header" style="background:#c62828"><h3>⚠️ মামলা খুঁজে পাওয়া যায়নি</h3></div>
+        <div class="status-card-body" style="text-align:center;padding:32px">
+          <div style="font-size:42px;margin-bottom:10px">🔎</div>
+          <div style="font-size:17px;font-weight:700;color:#c62828;margin-bottom:8px">কোনো তথ্য পাওয়া যায়নি</div>
+          <div style="color:var(--muted);margin-bottom:18px">অনুসন্ধানকৃত নম্বর: <strong>${searchVal}</strong></div>
+        </div>
+      </div>`;
+    return;
+  }
+
+  let html = '';
+  const totalStages = STAGES.length;
+  
+  for (let i = 0; i < results.length; i++) {
+    let data = results[i];
+    
+    let statusVal = data.status || 'অজানা';
+    let cfg = STATUS_CFG[statusVal] || {step: 1, badge: 'badge-default', icon: '📌'};
+    let step = data.step || 1;
+    
+    // প্রোগ্রেস বারের ডট এবং নাম জেনারেট করা
+    let dotsHTML = STAGES.map((_,idx) => `<div class="stage-dot ${idx < step-1 ? 'done' : idx === step-1 ? 'active' : ''}"></div>`).join('');
+    let namesHTML = STAGES.map((s,idx) => `<div class="stage-name ${idx === step-1 ? 'active-label' : ''}">${s}</div>`).join('');
+
+    let checkHTML = statusVal === 'চেক প্রস্তুত' ? `
+      <div class="check-ready-box">
+        <div style="font-size:28px">✅</div>
+        <div>
+          <div style="font-size:15px;font-weight:700;color:var(--success)">আপনার চেক প্রস্তুত!</div>
+          <div style="font-size:13px;color:#388e3c;margin-top:2px">মূল NID ও ব্যাংক পাসবুক নিয়ে কার্যালয়ে আসুন।</div>
+        </div>
+      </div>` : '';
+
+    // যদি তথ্যের ঘাটতি থাকে, তাহলে একটি অতিরিক্ত সতর্কতা মেসেজ দেখানো যেতে পারে
+    let warningHTML = statusVal === 'তথ্যের ঘাটতি রয়েছে' ? `
+      <div class="remarks-box" style="margin-top: 15px; background: #fff3e0; border-color: #ff9800; color: #e65100;">
+        <div class="remarks-label" style="color: #ef6c00;">⚠️ প্রয়োজনীয় তথ্যের অভাব</div>
+        আপনার ফাইলের কিছু নথিপত্র অসম্পূর্ণ রয়েছে বা তথ্যের ঘাটতি আছে। দয়া করে জরুরি ভিত্তিতে ভূমি অধিগ্রহণ শাখায় যোগাযোগ করুন।
+      </div>` : '';
+
+    html += `
+      <div class="status-card">
+        <div class="status-card-header">
+          <h3>📋 মামলার বিস্তারিত তথ্য</h3>
+          <span class="status-badge ${cfg.badge}">${cfg.icon} ${statusVal}</span>
+        </div>
+        <div class="status-card-body">
+          <div class="status-grid">
+            <div class="status-field"><div class="sf-label">এলএ কেস নং</div><div class="sf-value accent">${data.caseNo || '-'}</div></div>
+            <div class="status-field"><div class="sf-label">প্রকল্পের নাম</div><div class="sf-value" style="font-size:13px">${data.prokolpo || '-'}</div></div>
+            <div class="status-field"><div class="sf-label">উপজেলা</div><div class="sf-value">${data.upazila || '-'}</div></div>
+            <div class="status-field"><div class="sf-label">মৌজার নাম</div><div class="sf-value">${data.mouja || '-'}</div></div>
+            <div class="status-field"><div class="sf-label">আবেদনকারীর নাম</div><div class="sf-value">${data.applicant || '-'}</div></div>
+            <div class="status-field"><div class="sf-label">এনআইডি</div><div class="sf-value" style="font-size:13px;letter-spacing:2px">${data.nid || '-'}</div></div>
+            
+            <!-- মন্তব্যের নতুন ঘর -->
+      <div class="status-field" style="grid-column: span 3; border-top: 1px dashed var(--border); margin-top: 5px; padding-top: 10px;">
+        <div class="sf-label">অফিস মন্তব্য / সর্বশেষ আপডেট</div>
+        <div class="sf-value" style="color: var(--muted); font-weight: normal; font-size: 14px;">
+          ${data.remarks || 'কোনো মন্তব্য নেই'}
+        </div>
+      </div>
+
+            <div class="status-field" style="grid-column:span 3"><div class="sf-label">সর্বশেষ অবস্থা</div><div class="sf-value"><span class="status-badge ${cfg.badge}" style="font-size:12px;padding:3px 10px">${cfg.icon} ${statusVal}</span></div></div>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-label">প্রক্রিয়ার অগ্রগতি — ধাপ ${step}/${totalStages}</div>
+            <div class="progress-stages">${dotsHTML}</div>
+            <div class="stage-names">${namesHTML}</div>
+          </div>
+          ${warningHTML}
+          ${checkHTML}
+          <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn-secondary" onclick="window.print()">🖨️ প্রিন্ট</button>
+            <button class="btn-secondary" onclick="document.getElementById('contact-section').scrollIntoView({behavior:'smooth'})">📞 যোগাযোগ</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  
+  cont.innerHTML = html;
+  
+  if (results.some(r => r.status === 'চেক প্রস্তুত')) {
+    setTimeout(() => showToast('🎉 আপনার চেক প্রস্তুত! কার্যালয়ে যোগাযোগ করুন।'), 500);
+  } else if (results.some(r => r.status === 'তথ্যের ঘাটতি রয়েছে')) {
+    setTimeout(() => showToast('⚠️ আপনার ফাইলে তথ্যের ঘাটতি রয়েছে। দয়া করে যোগাযোগ করুন।'), 500);
+  }
+}
+
+function showErrorMsg(msg) {
+  document.getElementById('result-container').innerHTML = `
+    <div class="status-card" style="border-left-color:#c62828;max-width:900px;margin:0 auto 32px">
+      <div class="status-card-header" style="background:#c62828"><h3>⚠️ ত্রুটি</h3></div>
+      <div class="status-card-body" style="text-align:center;padding:32px">
+        <div style="font-size:17px;font-weight:700;color:#c62828;margin-bottom:8px">${msg}</div>
+      </div>
+    </div>`;
+}
+
+function toggleFaq(el){
+  el.classList.toggle('open');
+  el.querySelector('.faq-answer').classList.toggle('open');
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.style.display='block';
+  setTimeout(() => { t.style.display='none' }, 4000);
+}
+</script>
+</body>
+</html>
