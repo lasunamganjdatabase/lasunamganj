@@ -521,88 +521,53 @@
 <div id="toast" class="toast"></div>
 
 <script>
-
-  // আপনার index.html-এর script-এর একদম উপরে
 const API_URL = 'https://script.google.com/macros/s/AKfycbxdHk0kXYl1RFySAQ4QheOsuXJTYj8Ya4XbGMgfBkBkP_2Am0Bwcz79bAiKvAxAk39h/exec';
 
-// ধাপ এবং স্ট্যাটাসের নতুন কনফিগারেশন 
 const STATUS_CFG = {
-  '৪ ধারার নোটিশ':      {step:1, badge:'badge-notice',  icon:'📢'},
-  'যৌথ যাচাই':           {step:2, badge:'badge-verify',  icon:'🔍'},
-  '৭ ধারা নোটিশ':        {step:3, badge:'badge-notice',  icon:'📋'},
-  'ফাইল প্রসেসিং':       {step:4, badge:'badge-award',   icon:'⚙️'},
-  'নথিজাত':              {step:5, badge:'badge-filed',   icon:'🗂️'},  // ← নতুন
-  'তথ্যের ঘাটতি রয়েছে': {step:6, badge:'badge-default', icon:'⚠️'},  // ← ছিল 5
-  'চেক প্রস্তুত':        {step:7, badge:'badge-check',   icon:'✅'},  // ← ছিল 6
+  '৪ ধারার নোটিশ':      {badge:'badge-notice',  icon:'📢'},
+  'যৌথ যাচাই':           {badge:'badge-verify',  icon:'🔍'},
+  '৭ ধারা নোটিশ':        {badge:'badge-notice',  icon:'📋'},
+  'ফাইল প্রসেসিং':       {badge:'badge-award',   icon:'⚙️'},
+  'নথিজাত':              {badge:'badge-filed',   icon:'🗂️'},
+  'তথ্যের ঘাটতি রয়েছে': {badge:'badge-default', icon:'⚠️'},
+  'চেক প্রস্তুত':        {badge:'badge-check',   icon:'✅'},
 };
 
 const STAGES = [
-  '৪ ধারার নোটিশ',
-  'যৌথ যাচাই',
-  '৭ ধারা নোটিশ',
-  'ফাইল প্রসেসিং',
-  'নথিজাত',              // ← নতুন যোগ
-  'তথ্যের ঘাটতি রয়েছে',
-  'চেক প্রস্তুত'
+  '৪ ধারার নোটিশ','যৌথ যাচাই','৭ ধারা নোটিশ',
+  'ফাইল প্রসেসিং','নথিজাত','তথ্যের ঘাটতি রয়েছে','চেক প্রস্তুত'
 ];
 
 function searchCase() {
   var val = document.getElementById('case-no-input').value.trim();
-  if(!val) {
-    showToast("অনুগ্রহ করে আবেদনকারীর নাম বা এনআইডি প্রদান করুন।");
-    return;
-  }
+  if (!val) { showToast("অনুগ্রহ করে নাম বা এনআইডি প্রদান করুন।"); return; }
 
   const cont = document.getElementById('result-container');
   const area = document.getElementById('result-area');
   area.style.display = 'block';
-
-  // লোডার প্রদর্শন
-  cont.innerHTML = `
-    <div class="status-card loader-container">
-      <div class="spinner"></div>
-      <div style="font-weight: 600; color: var(--primary);">সার্ভার থেকে তথ্য খোঁজা হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...</div>
-    </div>
-  `;
-  area.scrollIntoView({behavior:'smooth',block:'start'});
-
-function searchCase() {
-  var val = document.getElementById('case-no-input').value.trim();
-  if (!val) {
-    showToast("অনুগ্রহ করে নাম বা এনআইডি প্রদান করুন।");
-    return;
-  }
-
-  const cont = document.getElementById('result-container');
-  const area = document.getElementById('result-area');
-  area.style.display = 'block';
-
-  cont.innerHTML = `
-    <div class="status-card loader-container">
-      <div class="spinner"></div>
-      <div style="font-weight:600;color:var(--primary);">
-        সার্ভার থেকে তথ্য খোঁজা হচ্ছে...
-      </div>
-    </div>`;
+  cont.innerHTML = `<div class="status-card loader-container"><div class="spinner"></div><div style="font-weight:600;color:var(--primary);">সার্ভার থেকে তথ্য খোঁজা হচ্ছে...</div></div>`;
   area.scrollIntoView({behavior:'smooth', block:'start'});
 
-  // JSONP দিয়ে call — CORS সমস্যা নেই
   const callbackName = 'cb_' + Date.now();
   const script = document.createElement('script');
-  
-  window[callbackName] = function(response) {
-    document.body.removeChild(script);
+
+  const timeout = setTimeout(function() {
     delete window[callbackName];
-    
-    if (response.error) {
-      showErrorMsg("সার্ভার ত্রুটি: " + response.error);
-      return;
-    }
+    showErrorMsg("সার্ভার সময়মতো সাড়া দেয়নি। আবার চেষ্টা করুন।");
+  }, 30000);
+
+  window[callbackName] = function(response) {
+    clearTimeout(timeout);
+    if (document.body.contains(script)) document.body.removeChild(script);
+    delete window[callbackName];
+    if (response.error) { showErrorMsg("সার্ভার ত্রুটি: " + response.error); return; }
     drawResults(response.data, val);
   };
 
   script.src = API_URL + '?callback=' + callbackName + '&q=' + encodeURIComponent(val);
   script.onerror = function() {
+    clearTimeout(timeout);
+    delete window[callbackName];
     showErrorMsg("সংযোগ ব্যর্থ হয়েছে। আবার চেষ্টা করুন।");
   };
   document.body.appendChild(script);
@@ -610,120 +575,48 @@ function searchCase() {
 
 function drawResults(results, searchVal) {
   const cont = document.getElementById('result-container');
-  
   if (!results || results.length === 0) {
-    cont.innerHTML = `
-      <div class="status-card" style="border-left-color:#c62828;max-width:900px;margin:0 auto 32px">
-        <div class="status-card-header" style="background:#c62828"><h3>⚠️ মামলা খুঁজে পাওয়া যায়নি</h3></div>
-        <div class="status-card-body" style="text-align:center;padding:32px">
-          <div style="font-size:42px;margin-bottom:10px">🔎</div>
-          <div style="font-size:17px;font-weight:700;color:#c62828;margin-bottom:8px">কোনো তথ্য পাওয়া যায়নি</div>
-          <div style="color:var(--muted);margin-bottom:18px">অনুসন্ধানকৃত নম্বর: <strong>${searchVal}</strong></div>
-        </div>
-      </div>`;
+    cont.innerHTML = `<div class="status-card" style="border-left-color:#c62828;max-width:900px;margin:0 auto 32px"><div class="status-card-header" style="background:#c62828"><h3>⚠️ মামলা খুঁজে পাওয়া যায়নি</h3></div><div class="status-card-body" style="text-align:center;padding:32px"><div style="font-size:42px;margin-bottom:10px">🔎</div><div style="font-size:17px;font-weight:700;color:#c62828;margin-bottom:8px">কোনো তথ্য পাওয়া যায়নি</div><div style="color:var(--muted)">অনুসন্ধানকৃত: <strong>${searchVal}</strong></div></div></div>`;
     return;
   }
 
-  let html = '';
   const totalStages = STAGES.length;
-  
+  let html = '';
+
   for (let i = 0; i < results.length; i++) {
-    let data = results[i];
-    
-    let statusVal = data.status || 'অজানা';
-    let cfg = STATUS_CFG[statusVal] || {step: 1, badge: 'badge-default', icon: '📌'};
-    let step = data.step || 1;
-    
-    // প্রোগ্রেস বারের ডট এবং নাম জেনারেট করা
-    let dotsHTML = STAGES.map((_,idx) => `<div class="stage-dot ${idx < step-1 ? 'done' : idx === step-1 ? 'active' : ''}"></div>`).join('');
-    let namesHTML = STAGES.map((s,idx) => `<div class="stage-name ${idx === step-1 ? 'active-label' : ''}">${s}</div>`).join('');
+    const d = results[i];
+    const statusVal = d.status || 'অজানা';
+    const cfg = STATUS_CFG[statusVal] || {badge:'badge-default', icon:'📌'};
+    const step = d.step || 1;
 
-    let checkHTML = statusVal === 'চেক প্রস্তুত' ? `
-      <div class="check-ready-box">
-        <div style="font-size:28px">✅</div>
-        <div>
-          <div style="font-size:15px;font-weight:700;color:var(--success)">আপনার চেক প্রস্তুত!</div>
-          <div style="font-size:13px;color:#388e3c;margin-top:2px">মূল NID ও ব্যাংক পাসবুক নিয়ে কার্যালয়ে আসুন।</div>
-        </div>
-      </div>` : '';
+    const dotsHTML = STAGES.map((_,idx) => `<div class="stage-dot ${idx < step-1 ? 'done' : idx === step-1 ? 'active' : ''}"></div>`).join('');
+    const namesHTML = STAGES.map((s,idx) => `<div class="stage-name ${idx === step-1 ? 'active-label' : ''}">${s}</div>`).join('');
 
-    // যদি তথ্যের ঘাটতি থাকে, তাহলে একটি অতিরিক্ত সতর্কতা মেসেজ দেখানো যেতে পারে
-    let warningHTML = statusVal === 'তথ্যের ঘাটতি রয়েছে' ? `
-      <div class="remarks-box" style="margin-top: 15px; background: #fff3e0; border-color: #ff9800; color: #e65100;">
-        <div class="remarks-label" style="color: #ef6c00;">⚠️ প্রয়োজনীয় তথ্যের অভাব</div>
-        আপনার ফাইলের কিছু নথিপত্র অসম্পূর্ণ রয়েছে বা তথ্যের ঘাটতি আছে। দয়া করে জরুরি ভিত্তিতে ভূমি অধিগ্রহণ শাখায় যোগাযোগ করুন।
-      </div>` : '';
+    const checkHTML = statusVal === 'চেক প্রস্তুত' ? `<div class="check-ready-box"><div style="font-size:28px">✅</div><div><div style="font-size:15px;font-weight:700;color:var(--success)">আপনার চেক প্রস্তুত!</div><div style="font-size:13px;color:#388e3c;margin-top:2px">মূল NID ও ব্যাংক পাসবুক নিয়ে কার্যালয়ে আসুন।</div></div></div>` : '';
+    const warningHTML = statusVal === 'তথ্যের ঘাটতি রয়েছে' ? `<div style="margin-top:15px;background:#fff3e0;border:1px solid #ff9800;border-radius:8px;padding:14px 18px;color:#e65100;"><div style="font-weight:700;margin-bottom:4px;">⚠️ প্রয়োজনীয় তথ্যের অভাব</div>আপনার ফাইলের কিছু নথিপত্র অসম্পূর্ণ। দয়া করে ভূমি অধিগ্রহণ শাখায় যোগাযোগ করুন।</div>` : '';
 
-    html += `
-      <div class="status-card">
-        <div class="status-card-header">
-          <h3>📋 মামলার বিস্তারিত তথ্য</h3>
-          <span class="status-badge ${cfg.badge}">${cfg.icon} ${statusVal}</span>
-        </div>
-        <div class="status-card-body">
-          <div class="status-grid">
-            <div class="status-field"><div class="sf-label">এলএ কেস নং</div><div class="sf-value accent">${data.caseNo || '-'}</div></div>
-            <div class="status-field"><div class="sf-label">প্রকল্পের নাম</div><div class="sf-value" style="font-size:13px">${data.prokolpo || '-'}</div></div>
-            <div class="status-field"><div class="sf-label">উপজেলা</div><div class="sf-value">${data.upazila || '-'}</div></div>
-            <div class="status-field"><div class="sf-label">মৌজার নাম</div><div class="sf-value">${data.mouja || '-'}</div></div>
-            <div class="status-field"><div class="sf-label">আবেদনকারীর নাম</div><div class="sf-value">${data.applicant || '-'}</div></div>
-            <div class="status-field"><div class="sf-label">এনআইডি</div><div class="sf-value" style="font-size:13px;letter-spacing:2px">${data.nid || '-'}</div></div>
-            
-            <!-- মন্তব্যের নতুন ঘর -->
-      <div class="status-field" style="grid-column: span 3; border-top: 1px dashed var(--border); margin-top: 5px; padding-top: 10px;">
-        <div class="sf-label">অফিস মন্তব্য / সর্বশেষ আপডেট</div>
-        <div class="sf-value" style="color: var(--muted); font-weight: normal; font-size: 14px;">
-          ${data.remarks || 'কোনো মন্তব্য নেই'}
-        </div>
-      </div>
-
-            <div class="status-field" style="grid-column:span 3"><div class="sf-label">সর্বশেষ অবস্থা</div><div class="sf-value"><span class="status-badge ${cfg.badge}" style="font-size:12px;padding:3px 10px">${cfg.icon} ${statusVal}</span></div></div>
-          </div>
-          <div class="progress-bar-container">
-            <div class="progress-label">প্রক্রিয়ার অগ্রগতি — ধাপ ${step}/${totalStages}</div>
-            <div class="progress-stages">${dotsHTML}</div>
-            <div class="stage-names">${namesHTML}</div>
-          </div>
-          ${warningHTML}
-          ${checkHTML}
-          <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
-            <button class="btn-secondary" onclick="window.print()">🖨️ প্রিন্ট</button>
-            <button class="btn-secondary" onclick="document.getElementById('contact-section').scrollIntoView({behavior:'smooth'})">📞 যোগাযোগ</button>
-          </div>
-        </div>
-      </div>
-    `;
+    html += `<div class="status-card"><div class="status-card-header"><h3>📋 মামলার বিস্তারিত তথ্য</h3><span class="status-badge ${cfg.badge}">${cfg.icon} ${statusVal}</span></div><div class="status-card-body"><div class="status-grid"><div class="status-field"><div class="sf-label">এলএ কেস নং</div><div class="sf-value accent">${d.caseNo||'-'}</div></div><div class="status-field"><div class="sf-label">প্রকল্পের নাম</div><div class="sf-value" style="font-size:13px">${d.prokolpo||'-'}</div></div><div class="status-field"><div class="sf-label">উপজেলা</div><div class="sf-value">${d.upazila||'-'}</div></div><div class="status-field"><div class="sf-label">মৌজার নাম</div><div class="sf-value">${d.mouja||'-'}</div></div><div class="status-field"><div class="sf-label">আবেদনকারীর নাম</div><div class="sf-value">${d.applicant||'-'}</div></div><div class="status-field"><div class="sf-label">এনআইডি</div><div class="sf-value" style="font-size:13px;letter-spacing:2px">${d.nid||'-'}</div></div><div class="status-field" style="grid-column:span 3;border-top:1px dashed var(--border);margin-top:5px;padding-top:10px;"><div class="sf-label">অফিস মন্তব্য / সর্বশেষ আপডেট</div><div class="sf-value" style="color:var(--muted);font-weight:normal;font-size:14px;">${d.remarks||'কোনো মন্তব্য নেই'}</div></div><div class="status-field" style="grid-column:span 3"><div class="sf-label">সর্বশেষ অবস্থা</div><div class="sf-value"><span class="status-badge ${cfg.badge}" style="font-size:12px;padding:3px 10px">${cfg.icon} ${statusVal}</span></div></div></div><div class="progress-bar-container"><div class="progress-label">প্রক্রিয়ার অগ্রগতি — ধাপ ${step}/${totalStages}</div><div class="progress-stages">${dotsHTML}</div><div class="stage-names">${namesHTML}</div></div>${warningHTML}${checkHTML}<div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap"><button class="btn-secondary" onclick="window.print()">🖨️ প্রিন্ট</button><button class="btn-secondary" onclick="document.getElementById('contact-section').scrollIntoView({behavior:'smooth'})">📞 যোগাযোগ</button></div></div></div>`;
   }
-  
+
   cont.innerHTML = html;
-  
-  if (results.some(r => r.status === 'চেক প্রস্তুত')) {
-    setTimeout(() => showToast('🎉 আপনার চেক প্রস্তুত! কার্যালয়ে যোগাযোগ করুন।'), 500);
-  } else if (results.some(r => r.status === 'তথ্যের ঘাটতি রয়েছে')) {
-    setTimeout(() => showToast('⚠️ আপনার ফাইলে তথ্যের ঘাটতি রয়েছে। দয়া করে যোগাযোগ করুন।'), 500);
-  }
+  if (results.some(r => r.status === 'চেক প্রস্তুত')) setTimeout(() => showToast('🎉 আপনার চেক প্রস্তুত!'), 500);
+  else if (results.some(r => r.status === 'তথ্যের ঘাটতি রয়েছে')) setTimeout(() => showToast('⚠️ তথ্যের ঘাটতি আছে। যোগাযোগ করুন।'), 500);
 }
 
 function showErrorMsg(msg) {
-  document.getElementById('result-container').innerHTML = `
-    <div class="status-card" style="border-left-color:#c62828;max-width:900px;margin:0 auto 32px">
-      <div class="status-card-header" style="background:#c62828"><h3>⚠️ ত্রুটি</h3></div>
-      <div class="status-card-body" style="text-align:center;padding:32px">
-        <div style="font-size:17px;font-weight:700;color:#c62828;margin-bottom:8px">${msg}</div>
-      </div>
-    </div>`;
+  document.getElementById('result-container').innerHTML = `<div class="status-card" style="border-left-color:#c62828;max-width:900px;margin:0 auto 32px"><div class="status-card-header" style="background:#c62828"><h3>⚠️ ত্রুটি</h3></div><div class="status-card-body" style="text-align:center;padding:32px"><div style="font-size:17px;font-weight:700;color:#c62828">${msg}</div></div></div>`;
 }
 
-function toggleFaq(el){
+function toggleFaq(el) {
   el.classList.toggle('open');
   el.querySelector('.faq-answer').classList.toggle('open');
 }
 
-function showToast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg;
-  t.style.display='block';
-  setTimeout(() => { t.style.display='none' }, 4000);
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 4000);
 }
 </script>
 </body>
